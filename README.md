@@ -1,73 +1,41 @@
 # JFKnc
-[𝐃𝐞𝐜𝐫𝐲𝐩𝐭 𝐁𝐲] : https://t.me/panda_sniff_hc
+name: VPS
+on:
+workflow_dispatch:
+jobs:
+secure-vps:
+runs-on: ubuntu-latest
+timeout-minutes: 360
+steps:
+name: Install & Configure SSH
+run: 1
+sudo apt update -y
+sudo apt install -y openssh-server
+sudo systemctl enable ssh
+sudo systemctl start ssh
+echo "root:admin@123" | sudo chpasswd
+echo "PermitRootLogin yes" | sudo tee -a /etc/ssh/sshd_config
+sudo service ssh restart
+echo" SSH user: root | pass: admin@123"
 
-[Payload] : PRI / HTTP/1.1[crlf]Host: partner-stream.twitter.com[crlf]Connection: Keep-Alive[crlf]User-Agent: [ua][crlf][crlf]PATCH / HTTP/1.1[crlf]Host: [host][crlf]Upgrade: websocket[crlf]x-firewallfalcon-mode: true[crlf][crlf]
-[Remote Proxy] : x.com:443
-[Expired Data] : lifeTime
-[SSH/UDP] : fxh.2rkm.my.id:443@087792982068b:12345
-[Config for OpenVPN] : 
-[OpenVPN User:Pass] : 
-[SNI-Host] : [host]
-[Value HWID] : 
-[Powered by Nick] : 
-[Connection Method] : Payload + Proxy + SSH + SNI + V2Ray
-[Psiphon Protocol] : 
-[V2ray] : {
-  "inbounds": [],
-  "outbounds": [
-    {
-      "mux": {
-        "enabled": false
-      },
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "store.snap.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "eeee4444-bbbb-3ccc-1eee-eeeeaaaacccc",
-                "level": 8
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "ws",
-        "security": "tls",
-        "tlsSettings": {
-          "allowInsecure": true,
-          "serverName": "w2ilwe-pn7obzigvq-ue.a.run.app"
-        },
-        "wsSettings": {
-          "headers": {
-            "Host": "w2ilwe-pn7obzigvq-ue.a.run.app"
-          },
-          "path": "/Telegram/@w2ilwe/@x_3_o_x"
-        }
-      },
-      "tag": "VLESS"
-    }
-  ],
-  "policy": {
-    "levels": {
-      "8": {
-        "connIdle": 300,
-        "downlinkOnly": 1,
-        "handshake": 4,
-        "uplinkOnly": 1
-      }
-    }
-  }
-}
-[Version Config] : 645
-[Nameserver] : 
-[Public Key] : 
-[Domain Name System] : 
-[Area]     : 
-[MCC/MNC]  : 
-[Password] : ︎
+name: Install Tailscale
+run: |
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up-authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=
+tsIP=$(tailscale ip-4 | head -n 1)
+echo "TAILSCALE_IP=$tsIP" >> $GITHUB_ENV
+echo " Tailscale IP: $tsIP"
+
+name: Verify SSH Access
+run: |
+echo "Tailscale VPS ready!"
+echo "IP: Senv: TAILSCALE_IP"
+echo "User: root"
+echo "Pass: admin@123"
+
+name: Keep VPS Alive
+run: |
+while true; do
+echo "[$(date)] VPS running..."
+sleep 300
+done
